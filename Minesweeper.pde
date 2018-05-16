@@ -5,7 +5,7 @@ import de.bezier.guido.*;
 private MSButton[][] buttons; //2d array of minesweeper buttons
 public final static int NUM_ROWS = 20;
 public final static int NUM_COLS = 20;
-public final static int NUM_BOMBS = 15;
+public final static int NUM_BOMBS = 40;
 private ArrayList <MSButton> bombs = new ArrayList<MSButton> (); //ArrayList of just the minesweeper buttons that are mined
 
 void setup ()
@@ -20,18 +20,19 @@ void setup ()
     for(int row = 0; row < NUM_ROWS; row++)
     {
       for(int col = 0; col < NUM_COLS; col++)
+      {
           buttons[row][col] = new MSButton(row, col);
     }
     
-    
+    } 
     setBombs();
 }
 public void setBombs()
 {
     while(bombs.size() < NUM_BOMBS)
     {
-    int row = (int)(Math.random()*NUM_ROWS);
-    int col = (int)(Math.random()*NUM_COLS);
+    int row = (int)(Math.random()*NUM_ROWS-1);
+    int col = (int)(Math.random()*NUM_COLS-1);
     if(!bombs.contains(buttons[row][col]))
     {
       bombs.add(buttons[row][col]);
@@ -48,16 +49,46 @@ public void draw ()
 }
 public boolean isWon()
 {
-    //your code here
-    return false;
+    for(int r = 0; r < NUM_ROWS; r++)
+      {
+        for(int c = 0; c < NUM_COLS; c++)
+        {
+          if(!buttons[r][c].isClicked() == true && !bombs.contains(buttons[r][c]))
+          {
+            return false;
+          }
+        }
+      }
+    return true;
 }
 public void displayLosingMessage()
 {
-    //your code here
+    for(int r = 0; r < NUM_ROWS; r++)
+    {
+      for(int c = 0; c < NUM_COLS; c++)
+      {
+        if(buttons[r][c].isClicked() && bombs.contains(buttons[r][c]))
+        {
+          buttons[r][c].marked = false;
+          buttons[r][c].clicked = true;
+          buttons[11][4].setLabel("S");
+          buttons[11][5].setLabel("u");
+          buttons[11][6].setLabel("c");
+          buttons[11][7].setLabel("h");
+          buttons[11][9].setLabel("a");
+          buttons[11][11].setLabel("P");
+          buttons[11][12].setLabel("i");
+          buttons[11][13].setLabel("t");
+          buttons[11][14].setLabel("y");
+          buttons[11][15].setLabel("!");
+          
+        }
+      }
+    }
 }
 public void displayWinningMessage()
 {
-    //your code here
+    text("Hooray!!!", 200, 200);
 }
 
 public class MSButton
@@ -94,20 +125,39 @@ public class MSButton
         clicked = true;
         if( keyPressed == true)
         {
-          marked = true;
+          marked = !marked;
           
           if(marked == false)
           {
           clicked = false;
           }
+        }
           else if(bombs.contains(this))
-          displayLosingMessage();
-          else if(countBombs > 0)
-          return 
+            displayLosingMessage();
+          else if(countBombs(r, c)> 0)
+            setLabel("" + countBombs(r, c));
+          else{
+            if(isValid(r,c-1) && buttons[r][c-1].clicked == false)
+                buttons[r][c-1].mousePressed();
+            if(isValid(r,c+1) && buttons[r][c+1].clicked == false)
+                buttons[r][c+1].mousePressed();
+            if(isValid(r-1,c) && buttons[r-1][c].clicked == false)
+                buttons[r-1][c].mousePressed();  
+            if(isValid(r+1,c) && buttons[r+1][c].clicked == false)
+                buttons[r+1][c].mousePressed();
+            if(isValid(r+1,c+1) && buttons[r+1][c+1].clicked == false)
+                buttons[r+1][c+1].mousePressed();
+            if(isValid(r+1,c-1) && buttons[r+1][c-1].clicked == false)
+                buttons[r+1][c-1].mousePressed();
+            if(isValid(r-1,c-1) && buttons[r-1][c-1].clicked == false)
+                buttons[r-1][c-1].mousePressed();    
+            if(isValid(r-1,c+1) && buttons[r-1][c+1].clicked == false)
+                buttons[r-1][c+1].mousePressed();
+          }
         }
          
         
-    }
+    
 
     public void draw () 
     {    
@@ -130,8 +180,9 @@ public class MSButton
     }
     public boolean isValid(int r, int c)
     {
-        if(r < 20  && r >= 0 && c < 20 && c >= 0)
+        if(r >= 0  && r < NUM_ROWS && c >= 0 && c < NUM_COLS)
         return true;
+        else
         return false;
     }
     public int countBombs(int row, int col)
